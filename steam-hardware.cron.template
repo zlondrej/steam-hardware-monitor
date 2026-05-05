@@ -1,0 +1,9 @@
+# Environment variables
+SHELL=/bin/bash
+PROJECT_DIR=/steam-hardware
+WEBHOOK_URL=https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_TOKEN
+ROLE_ID=0
+
+# Steam Hardware Monitor - Check every 5 minutes
+# Run `pipenv install` in the project directory before you install the job
+*/5 * * * * user cd $PROJECT_DIR && pipenv run python3 steam_hardware.py -p steam_controller -c CZ -w "$WEBHOOK_URL" -r $ROLE_ID >> $PROJECT_DIR/monitor.log 2>&1
