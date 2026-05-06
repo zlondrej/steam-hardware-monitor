@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.SteamMonitor" parent="android:Theme.Material.NoActionBar">
+        <item name="android:colorPrimary">#1B2838</item>
+        <item name="android:colorPrimaryDark">#0F1419</item>
+        <item name="android:colorAccent">#66C0FF</item>
+    </style>
+</resources>

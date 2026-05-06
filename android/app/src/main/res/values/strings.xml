@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Steam Monitor</string>
+    <string name="refresh">Refresh</string>
+    <string name="last_updated">Last updated: %s</string>
+    <string name="in_stock">✅ In Stock</string>
+    <string name="out_of_stock">❌ Out of Stock</string>
+    <string name="estimated_delivery">Estimated Delivery: %d-%d business days</string>
+    <string name="high_pending_orders">⚠️ High pending orders</string>
+    <string name="available_in_region">Available in your region</string>
+    <string name="error">Error: %s</string>
+
+    <!-- Notification strings -->
+    <string name="notification_checked">Checked: %s</string>
+    <string name="notification_delivery">Delivery: %d-%d business days</string>
+
+    <!-- Settings strings -->
+    <string name="settings">Settings</string>
+    <string name="check_interval">Check Interval (minutes)</string>
+    <string name="track_steam_controller">Track Steam Controller</string>
+
+    <!-- Background worker service notification -->
+    <string name="worker_notification_title">Steam Hardware Monitor</string>
+    <string name="worker_notification_active">Active • Interval: %d minutes\nNext: %s • Last: %s</string>
+    <string name="worker_notification_suspended">Suspended • Last: %s</string>
+
+    <!-- UI hints -->
+    <string name="pull_to_refresh_hint">⬇️ Pull down to refresh</string>
+</resources>

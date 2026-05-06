@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package steam.store;
+
+/**
+ * Steam Hardware API Protocol Buffers
+ *
+ * Reverse-engineered from Steam Store webpack chunks
+ * Used by IStoreBrowseService/GetHardwareItems/v1
+ */
+
+// Request message for GetHardwareItems
+message GetHardwareItemsRequest {
+  uint32 hardware_id = 1;
+  HardwareRequestOptions options = 2;
+}
+
+// Nested options in GetHardwareItemsRequest
+message HardwareRequestOptions {
+  string language = 1;            // e.g., "english"
+  string country_code = 3;        // e.g., "US"
+}
+
+// Response message containing hardware items
+message GetHardwareItemsResponse {
+  repeated CHardwareItem items = 1;
+}
+
+// Individual hardware item
+message CHardwareItem {
+  CHardwarePackageDetails package_details = 1;
+  // May contain other fields
+}
+
+// Core hardware package details
+// This is the message we're interested in!
+// This name matches the name in the Steam's JS code
+message CHardwarePackageDetails {
+  uint32 packageid = 1;
+
+  // Availability status
+  bool inventory_available = 3;
+
+  // Order status
+  bool high_pending_orders = 4;
+
+  // Purchase restrictions
+  bool account_restricted_from_purchasing = 5;
+  bool requires_reservation = 6;
+
+  // Notification timing
+  uint32 rtime_estimated_notification = 7;
+  string notification_token = 8;  // Steam's spelling has typo: notificaton_token
+
+  // Reservation details
+  int32 reservation_state = 9;
+  bool expired = 10;
+  uint32 time_expires = 11;
+  uint32 time_reserved = 12;
+
+  // Purchase quantity options
+  bool allow_quantity_purchase = 13;
+  int32 max_quantity_per_purchase = 14;
+
+  // Regional availability
+  bool allow_purchase_in_country = 15;
+
+  // Delivery estimates (in business days)
+  uint32 estimated_delivery_soonest_business_days = 17;
+  uint32 estimated_delivery_latest_business_days = 18;
+}
+
+// Constants for known hardware
+message HardwareConstants {
+  uint32 STEAM_CONTROLLER = 1391110;
+}
