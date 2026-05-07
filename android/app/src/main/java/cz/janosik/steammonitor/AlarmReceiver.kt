@@ -87,7 +87,7 @@ class AlarmReceiver : BroadcastReceiver() {
         val notification =
             androidx.core.app.NotificationCompat
                 .Builder(context, MonitorWorker.AVAILABILITY_NOTIFICATION_CHANNEL_ID)
-                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle(item.name)
                 .setContentText(status)
                 .setStyle(
@@ -115,7 +115,7 @@ class AlarmReceiver : BroadcastReceiver() {
         val notification =
             androidx.core.app.NotificationCompat
                 .Builder(context, MonitorWorker.AVAILABILITY_NOTIFICATION_CHANNEL_ID)
-                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle("Steam Hardware Monitor")
                 .setContentText("Availability check started at $checkedTime")
                 .setPriority(androidx.core.app.NotificationCompat.PRIORITY_LOW)

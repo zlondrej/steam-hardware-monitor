@@ -143,7 +143,7 @@ object BootHelper {
         val notification =
             NotificationCompat
                 .Builder(context, MonitorWorker.WORKER_NOTIFICATION_CHANNEL_ID)
-                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle(context.getString(R.string.worker_notification_title))
                 .setStyle(NotificationCompat.BigTextStyle().bigText(contentText))
                 .setOngoing(true)

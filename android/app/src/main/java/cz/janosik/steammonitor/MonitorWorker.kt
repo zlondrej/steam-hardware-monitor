@@ -85,7 +85,7 @@ class MonitorWorker(
         val notification =
             NotificationCompat
                 .Builder(applicationContext, AVAILABILITY_NOTIFICATION_CHANNEL_ID)
-                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle(item.name)
                 .setContentText(status)
                 .setStyle(
