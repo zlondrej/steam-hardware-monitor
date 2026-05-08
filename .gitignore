@@ -1,3 +1,6 @@
 .files
 *.log
+*.har
 Pipfile.lock
+
+steam_controller.sh
