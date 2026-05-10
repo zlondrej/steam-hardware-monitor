@@ -6,19 +6,28 @@ package steam.store;
  * Steam Hardware API Protocol Buffers
  *
  * Reverse-engineered from Steam Store webpack chunks
- * Used by IStoreBrowseService/GetHardwareItems/v1
+ *
+ * Full reverse-engineered API:
+ * https://github.com/SteamTracking/Protobufs/tree/master/webui
+ *
+ * Store browser API:
+ * https://github.com/SteamTracking/Protobufs/blob/master/webui/service_storebrowse.proto
  */
+
+// ============================================================================
+// GetHardwareItems API (IStoreBrowseService/GetHardwareItems/v1)
+// ============================================================================
 
 // Request message for GetHardwareItems
 message GetHardwareItemsRequest {
   uint32 hardware_id = 1;
-  HardwareRequestOptions options = 2;
+  optional HardwareRequestOptions options = 2;
 }
 
 // Nested options in GetHardwareItemsRequest
 message HardwareRequestOptions {
   string language = 1;            // e.g., "english"
-  string country_code = 3;        // e.g., "CZ"
+  string country_code = 3;        // e.g., "US"
 }
 
 // Response message containing hardware items
@@ -29,7 +38,6 @@ message GetHardwareItemsResponse {
 // Individual hardware item
 message CHardwareItem {
   CHardwarePackageDetails package_details = 1;
-  // May contain other fields
 }
 
 // Core hardware package details
@@ -39,38 +47,325 @@ message CHardwarePackageDetails {
   uint32 packageid = 1;
 
   // Availability status
-  bool inventory_available = 3;
+  optional bool inventory_available = 3;
 
   // Order status
-  bool high_pending_orders = 4;
+  optional bool high_pending_orders = 4;
 
   // Purchase restrictions
-  bool account_restricted_from_purchasing = 5;
-  bool requires_reservation = 6;
+  optional bool account_restricted_from_purchasing = 5;
+  optional bool requires_reservation = 6;
 
   // Notification timing
-  uint32 rtime_estimated_notification = 7;
-  string notification_token = 8;  // Steam's spelling has typo: notificaton_token
+  optional uint32 rtime_estimated_notification = 7;
+  optional string notification_token = 8;  // Steam's spelling has typo: notificaton_token
 
   // Reservation details
-  int32 reservation_state = 9;
-  bool expired = 10;
-  uint32 time_expires = 11;
-  uint32 time_reserved = 12;
+  optional int32 reservation_state = 9;
+  optional bool expired = 10;
+  optional uint32 time_expires = 11;
+  optional uint32 time_reserved = 12;
 
   // Purchase quantity options
-  bool allow_quantity_purchase = 13;
-  int32 max_quantity_per_purchase = 14;
+  optional bool allow_quantity_purchase = 13;
+  optional int32 max_quantity_per_purchase = 14;
 
   // Regional availability
-  bool allow_purchase_in_country = 15;
+  optional bool allow_purchase_in_country = 15;
 
   // Delivery estimates (in business days)
-  uint32 estimated_delivery_soonest_business_days = 17;
-  uint32 estimated_delivery_latest_business_days = 18;
+  optional uint32 estimated_delivery_soonest_business_days = 17;
+  optional uint32 estimated_delivery_latest_business_days = 18;
 }
 
-// Constants for known hardware
-message HardwareConstants {
-  uint32 STEAM_CONTROLLER = 1391110;
+// ============================================================================
+// GetItems API (IStoreBrowseService/GetItems/v1)
+// ============================================================================
+
+// Request message for GetItems
+message GetItemsRequest {
+  repeated StoreItemID ids = 1;
+  optional StoreBrowseContext context = 2;
+  optional StoreBrowseItemDataRequest data_request = 3;
 }
+
+// Item ID selector
+message StoreItemID {
+  optional uint32 appid = 1;
+  optional uint32 packageid = 2;
+  optional uint32 bundleid = 3;
+}
+
+// Context/options for browsing
+message StoreBrowseContext {
+  string language = 1;
+  int32 elanguage = 2;
+  string country_code = 3;
+}
+
+// Flags controlling what data to include in response
+message StoreBrowseItemDataRequest {
+  optional bool include_assets = 1;
+  optional bool include_release = 2;
+  optional bool include_platforms = 3;
+  optional bool include_all_purchase_options = 4;
+  optional bool include_screenshots = 5;
+  optional bool include_trailers = 6;
+  optional bool include_ratings = 7;
+  optional int32 include_tag_count = 8;
+  optional bool include_reviews = 9;
+  optional bool include_basic_info = 10;
+  optional bool include_supported_languages = 11;
+  optional bool include_full_description = 12;
+  optional bool include_included_items = 13;
+  optional StoreBrowseItemDataRequest included_item_data_request = 14;
+  optional bool include_assets_without_overrides = 15;
+  optional bool apply_user_filters = 16;
+  optional bool include_links = 17;
+}
+
+// Response message for GetItems
+message GetItemsResponse {
+  repeated StoreItem store_items = 1;
+}
+
+// StoreItem nested types
+message StoreItem_Demo {
+  uint32 appid = 1;
+  optional uint32 parent_appid = 2;
+}
+
+message StoreItem_RelatedItems {
+  uint32 parent_appid = 1;
+  repeated uint32 demo_appid = 2;
+  repeated uint32 standalone_demo_appid = 3;
+  repeated StoreItem_Demo demos = 4;
+  repeated StoreItem_Demo standalone_demos = 5;
+}
+
+message StoreItem_IncludedItems {
+  repeated StoreItem_IncludedItem included_apps = 1;
+  repeated StoreItem_IncludedItem included_packages = 2;
+  repeated StoreItem_IncludedItem included_bundles = 3;
+}
+
+message StoreItem_IncludedItem {
+  uint32 id = 1;
+}
+
+message StoreItem_Categories {
+  repeated uint32 player_categories = 1;
+  repeated uint32 feature_categories = 2;
+  repeated uint32 controller_categories = 3;
+}
+
+message StoreItem_Reviews {
+  optional StoreItem_Reviews_StoreReviewSummary summary_filtered = 1;
+  optional StoreItem_Reviews_StoreReviewSummary summary_unfiltered = 2;
+  optional StoreItem_Reviews_StoreReviewSummary summary_language_specific = 3;
+}
+
+message StoreItem_Reviews_StoreReviewSummary {
+  uint32 review_count = 1;
+  int32 percent_positive = 2;
+  int32 review_score = 3;
+  string review_score_label = 4;
+}
+
+message StoreItem_BasicInfo {
+  string short_description = 1;
+  repeated StoreItem_BasicInfo_CreatorHomeLink publishers = 2;
+  repeated StoreItem_BasicInfo_CreatorHomeLink developers = 3;
+  repeated StoreItem_BasicInfo_CreatorHomeLink franchises = 4;
+  optional string capsule_headline = 5;
+}
+
+message StoreItem_BasicInfo_CreatorHomeLink {
+  string name = 1;
+  uint32 creator_clan_account_id = 2;
+}
+
+message StoreItem_Tags {
+  uint32 tagid = 1;
+  uint32 weight = 2;
+}
+
+message StoreItem_Assets {
+  optional string logo = 1;
+  optional string hero = 2;
+  optional string hero_blur = 3;
+  optional string capsule = 4;
+  optional string capsule_sm = 5;
+  optional string header = 6;
+  optional string page_bg = 7;
+  optional string library_400 = 8;
+  optional string library_hero = 9;
+  optional string library_logo = 10;
+  optional string icon = 11;
+  optional string library_600x900 = 12;
+  optional string library_600x900_2x = 13;
+  optional string logo_sm = 14;
+  optional string vertical_cover = 15;
+  optional string vertical_cover_2x = 16;
+}
+
+message StoreItem_ReleaseInfo {
+  optional uint32 steam_release_date = 1;
+  optional uint32 original_release_date = 2;
+  optional uint32 original_game_release_date = 3;
+  optional bool coming_soon = 4;
+  optional bool early_access = 5;
+  optional bool is_pre_purchase = 6;
+  optional uint32 preload_date = 7;
+  optional uint32 preload_until_date = 8;
+}
+
+message StoreItem_Platforms {
+  optional bool windows = 1;
+  optional bool mac = 2;
+  optional bool linux = 3;
+  optional StoreItem_Platforms_VRSupport vr_support = 4;
+}
+
+message StoreItem_Platforms_VRSupport {
+  optional bool vr_os = 1;
+  optional bool vr_controller = 2;
+}
+
+message StoreItem_GameRating {
+  // Placeholder for complex rating system
+  // Contains ESRB, PEGI, ClassInd, and other rating systems
+  optional string rating_type = 1;
+  optional string rating_value = 2;
+}
+
+message StoreItem_PurchaseOption {
+  optional string packageid = 1;
+  optional uint32 bundleid = 2;
+  optional uint32 quantity = 3;
+  optional uint32 discount_percent = 4;
+  optional uint32 discount_expiration = 5;
+  optional bool requires_subscription = 6;
+  optional string discount_description = 7;
+  optional string discount_note = 8;
+  optional uint32 state = 9;
+  optional StoreItem_PurchaseOption_Discount best_purchase_discount = 10;
+  optional StoreItem_PurchaseOption_RecurrenceInfo recurrence_info = 11;
+}
+
+message StoreItem_PurchaseOption_Discount {
+  uint32 discount_percent = 1;
+  uint32 discount_expiration = 2;
+}
+
+message StoreItem_PurchaseOption_RecurrenceInfo {
+  optional uint32 recurrence = 1;
+}
+
+message StoreItem_Screenshots {
+  repeated StoreItem_Screenshots_Screenshot screenshots = 1;
+}
+
+message StoreItem_Screenshots_Screenshot {
+  uint32 ordinal = 1;
+  optional string url_full = 2;
+  optional string url_thumbnail = 3;
+}
+
+message StoreItem_Trailers {
+  repeated StoreItem_Trailers_Trailer trailers = 1;
+}
+
+message StoreItem_Trailers_Trailer {
+  uint32 videoid = 1;
+  optional string url = 2;
+  optional string url_thumbnail = 3;
+  optional string title = 4;
+  optional string duration = 5;
+  repeated StoreItem_Trailers_VideoSource videos = 6;
+}
+
+message StoreItem_Trailers_VideoSource {
+  optional string url = 1;
+  optional string quality = 2;
+}
+
+message StoreItem_SupportedLanguages {
+  string language = 1;
+  optional bool audio_support = 2;
+  optional bool subtitle_support = 3;
+}
+
+message StoreItem_FreeWeekend {
+  optional uint32 start_date = 1;
+  optional uint32 end_date = 2;
+}
+
+message StoreBrowseFilterFailure {
+  optional bool failed_language_filter = 1;
+  optional bool failed_platform_filter = 2;
+  optional bool failed_category_filter = 3;
+  optional bool failed_os_filter = 4;
+}
+
+message StoreItem_Links {
+  string url = 1;
+  optional string label = 2;
+}
+
+message StoreItem_PackageGroup {
+  optional uint32 packageid = 1;
+  optional string title = 2;
+  optional string purchase_option_description = 3;
+  optional bool is_primary = 4;
+}
+
+// Core store item (product) structure
+message StoreItem {
+  int32 item_type = 1;
+  uint32 id = 2;
+  uint32 success = 3;
+  optional bool visible = 4;
+  optional bool unavailable_for_country_restriction = 5;
+  optional string name = 6;
+  optional string store_url_path = 7;
+  optional uint32 appid = 9;
+  optional int32 type = 10;
+  repeated int32 included_types = 11;
+  repeated uint32 included_appids = 12;
+  optional bool is_free = 13;
+  optional bool is_early_access = 14;
+  optional StoreItem_RelatedItems related_items = 15;
+  optional StoreItem_IncludedItems included_items = 16;
+  optional string review_percentage = 18;
+  repeated int32 content_descriptorids = 20;
+  repeated uint32 tagids = 21;
+  optional StoreItem_Categories categories = 22;
+  optional StoreItem_Reviews reviews = 23;
+  optional StoreItem_BasicInfo basic_info = 24;
+  repeated StoreItem_Tags tags = 25;
+  optional StoreItem_Assets assets = 30;
+  optional StoreItem_ReleaseInfo release = 31;
+  optional StoreItem_Platforms platforms = 32;
+  optional StoreItem_GameRating game_rating = 33;
+  optional bool is_coming_soon = 34;
+  optional StoreItem_PurchaseOption best_purchase_option = 40;
+  repeated StoreItem_PurchaseOption purchase_options = 41;
+  optional StoreItem_PurchaseOption self_purchase_option = 43;
+  repeated StoreItem_Screenshots screenshots = 50;
+  repeated StoreItem_Trailers trailers = 51;
+  repeated StoreItem_SupportedLanguages supported_languages = 52;
+  optional string store_url_path_override = 53;
+  optional StoreItem_FreeWeekend free_weekend = 54;
+  optional bool unlisted = 55;
+  optional uint32 game_count = 56;
+  optional string internal_name = 57;
+  optional string full_description_bbcode = 58;
+  optional bool is_free_temporarily = 59;
+  optional StoreItem_Assets assets_without_overrides = 60;
+  optional StoreBrowseFilterFailure user_filter_failure = 70;
+  repeated StoreItem_Links links = 71;
+  optional string purchase_description_bbcode = 72;
+  repeated StoreItem_PackageGroup package_groups = 74;
+}
+
