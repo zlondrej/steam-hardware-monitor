@@ -4,3 +4,5 @@
 Pipfile.lock
 
 steam_controller.sh
+
+__pycache__/

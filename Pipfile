@@ -8,6 +8,8 @@ grpcio = "*"
 protobuf = "*"
 grpcio-tools = "*"
 requests = "*"
+steam-next = {extras = ["client"], file = "../steam-next"}
+json5 = "*"
 
 [dev-packages]
 

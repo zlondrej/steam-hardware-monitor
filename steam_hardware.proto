@@ -21,7 +21,7 @@ package steam.store;
 // Request message for GetHardwareItems
 message GetHardwareItemsRequest {
   uint32 hardware_id = 1;
-  optional HardwareRequestOptions options = 2;
+  HardwareRequestOptions options = 2;
 }
 
 // Nested options in GetHardwareItemsRequest
@@ -85,7 +85,7 @@ message CHardwarePackageDetails {
 // Request message for GetItems
 message GetItemsRequest {
   repeated StoreItemID ids = 1;
-  optional StoreBrowseContext context = 2;
+  StoreBrowseContext context = 2;
   optional StoreBrowseItemDataRequest data_request = 3;
 }
 
