@@ -56,7 +56,8 @@ def _stringify_keys(obj: Any) -> Any:
                 result = []
                 for i in range(len(int_keys_sorted)):
                     # Find original key for this index
-                    original_key = [k for k in keys if (int(k) if isinstance(k, str) else k) == i][0]
+                    original_key = [k for k in keys if (
+                        int(k) if isinstance(k, str) else k) == i][0]
                     result.append(_stringify_keys(obj[original_key]))
                 return result
         except (ValueError, TypeError, IndexError):
@@ -84,18 +85,53 @@ class OutputMonitor:
         self.state_file = Path(state_file)
         self.webhook_url = webhook_url
         self.mentions = mentions or []
-        self.current_output = None
-        self.previous_output = None
+        self.names_cache = {'app_1675200': 'Steam Deck',
+                            'app_4165870': 'Steam Controller',
+                            'app_4165890': 'Steam Frame',
+                            'app_4165910': 'Steam Machine',
+                            'package_1186053': '* Steam Deck #1186053',
+                            'package_1186054': '* Steam Deck #1186054',
+                            'package_1186055': '* Steam Deck #1186055',
+                            'package_1202542': '* Steam Deck #1202542',
+                            'package_1202547': '* Steam Deck #1202547',
+                            'package_1459457': '? Steam Frame #1459457',
+                            'package_1459458': '? Steam Frame #1459458',
+                            'package_1459459': '? Steam Frame #1459459',
+                            'package_1459460': '? Steam Machine #1459460',
+                            'package_1459461': '? Steam Machine #1459461',
+                            'package_1459462': '? Steam Machine #1459462',
+                            'package_1558609': '* Steam Controller #1558609',
+                            'package_1629446': '? Steam Machine #1629446',
+                            'package_1629447': '? Steam Machine #1629447',
+                            'package_1629448': '? Steam Machine #1629448',
+                            'package_1629458': '? Steam Machine #1629458',
+                            'package_1629459': '? Steam Machine #1629459',
+                            'package_1629460': '? Steam Machine #1629460',
+                            'package_1629461': '? Steam Machine #1629461',
+                            'package_1629484': '? Steam Frame #1629484',
+                            'package_1629485': '? Steam Frame #1629485',
+                            'package_1629486': '? Steam Frame #1629486',
+                            'package_1629487': '? Steam Frame #1629487',
+                            'package_595604': '* Steam Deck #595604',
+                            'package_595605': '* Steam Deck #595605',
+                            'package_903905': '* Steam Deck #903905',
+                            'package_903906': '* Steam Deck #903906',
+                            'package_903907': '* Steam Deck #903907',
+                            'package_946113': '* Steam Deck #946113',
+                            'package_946114': '* Steam Deck #946114',
+                            }
 
         # Ensure parent directory exists
-        self.state_file.parent.mkdir(parents=True, exist_ok=True)
+        self.state_file.parent.mkdir(parents=True,
+                                     exist_ok=True)
 
     def get_product_info_output(self) -> Optional[Dict]:
         """
         Execute product info collection code and capture its output.
 
         Returns:
-            The product info dict, or None if execution failed
+            The product info dict,
+            or None if execution failed
         """
         raw_output = self._get_raw_product_info()
         if raw_output is None:
@@ -246,13 +282,15 @@ class OutputMonitor:
         Returns:
             Dictionary with comparison results, or None if no changes
         """
+
         if previous is None or current == previous:
             return None
 
         # Detailed comparison
         return self._detailed_comparison(current, previous)
 
-    def _detailed_comparison(self, current: Dict, previous: Dict) -> Dict:
+    @staticmethod
+    def _detailed_comparison(current: Dict, previous: Dict) -> Dict:
         """Compare apps and packages in detail."""
         changes = {'apps': {}, 'packages': {}}
 
@@ -268,13 +306,14 @@ class OutputMonitor:
 
             if previous_data is None:
                 # New app
-                changes['apps'][app_id] = {'status': 'new', 'data': current_data}
+                changes['apps'][app_id] = {
+                    'status': 'new', 'data': current_data}
             elif current_data is None:
                 # Removed app
                 changes['apps'][app_id] = {'status': 'removed'}
             else:
                 # Check if common or extended changed
-                diff = self._compare_item(previous_data, current_data)
+                diff = OutputMonitor._compare_item(previous_data, current_data)
                 if diff:
                     changes['apps'][app_id] = {
                         'status': 'changed',
@@ -285,7 +324,8 @@ class OutputMonitor:
         current_packages = current.get('packages', {})
         previous_packages = previous.get('packages', {})
 
-        all_pkg_ids = set(current_packages.keys()) | set(previous_packages.keys())
+        all_pkg_ids = set(current_packages.keys()) | set(
+            previous_packages.keys())
 
         for pkg_id in all_pkg_ids:
             current_data = current_packages.get(pkg_id)
@@ -293,13 +333,14 @@ class OutputMonitor:
 
             if previous_data is None:
                 # New package
-                changes['packages'][pkg_id] = {'status': 'new', 'data': current_data}
+                changes['packages'][pkg_id] = {
+                    'status': 'new', 'data': current_data}
             elif current_data is None:
                 # Removed package
                 changes['packages'][pkg_id] = {'status': 'removed'}
             else:
                 # Check if common or extended changed
-                diff = self._compare_item(previous_data, current_data)
+                diff = OutputMonitor._compare_item(previous_data, current_data)
                 if diff:
                     changes['packages'][pkg_id] = {
                         'status': 'changed',
@@ -308,7 +349,8 @@ class OutputMonitor:
 
         return changes
 
-    def _compare_item(self, previous: Dict, current: Dict) -> Dict:
+    @staticmethod
+    def _compare_item(previous: Dict, current: Dict) -> Dict:
         """Compare common, extended, and change_number fields of an item."""
         diff = {}
 
@@ -316,13 +358,15 @@ class OutputMonitor:
         prev_common = previous.get('common', {})
         curr_common = current.get('common', {})
         if prev_common != curr_common:
-            diff['common'] = self._field_diff(prev_common, curr_common)
+            diff['common'] = OutputMonitor._field_diff(
+                prev_common, curr_common)
 
         # Compare extended
         prev_extended = previous.get('extended', {})
         curr_extended = current.get('extended', {})
         if prev_extended != curr_extended:
-            diff['extended'] = self._field_diff(prev_extended, curr_extended)
+            diff['extended'] = OutputMonitor._field_diff(
+                prev_extended, curr_extended)
 
         # Compare _change_number (display as change_number, wrapped in meta)
         prev_change = previous.get('_change_number')
@@ -334,7 +378,8 @@ class OutputMonitor:
 
         return diff
 
-    def _field_diff(self, previous: Dict, current: Dict) -> Dict:
+    @staticmethod
+    def _field_diff(previous: Dict, current: Dict) -> Dict:
         """Find added, removed, and changed fields."""
         result = {}
 
@@ -344,7 +389,8 @@ class OutputMonitor:
             if prev_val is None:
                 result[key] = {'status': 'added', 'value': curr_val}
             elif prev_val != curr_val:
-                result[key] = {'status': 'changed', 'old': prev_val, 'new': curr_val}
+                result[key] = {'status': 'changed',
+                               'old': prev_val, 'new': curr_val}
 
         # Removed
         for key in previous:
@@ -382,7 +428,7 @@ class OutputMonitor:
         elif status == 'removed':
             print(f"  {Colors.RED}- {item_type} {item_id}{Colors.RESET}")
         elif status == 'changed':
-            name = self._get_item_name(change_info, item_type)
+            name = self._get_item_name(item_id, change_info, item_type)
             print(f"  {Colors.CYAN}~ {item_type} {item_id}{Colors.RESET}", end="")
             if name:
                 print(f" ({name})", end="")
@@ -392,9 +438,10 @@ class OutputMonitor:
             for field_type, fields in diff.items():
                 print(f"      {Colors.BOLD}{field_type}:{Colors.RESET}")
                 for field_name, field_change in fields.items():
-                    self._print_field_change(field_name, field_change, indent=8)
+                    self._print_field_change(
+                        field_name, field_change, indent=8)
 
-    def _get_item_name(self, change_info: Dict, item_type: str = 'app') -> Optional[str]:
+    def _get_item_name(self, item_id: str, change_info: Dict, item_type: str = 'app') -> Optional[str]:
         """Extract the name from item data. For packages, look up the first app's name."""
         # Check in diff first
         diff = change_info.get('diff', {})
@@ -411,18 +458,7 @@ class OutputMonitor:
         if name:
             return name
 
-        # For packages, look up first app's name
-        if item_type == 'package':
-            appids = data.get('appids', [])
-            if appids and self.current_output:
-                first_app_id = str(appids[0])
-                apps = self.current_output.get('apps', {})
-                if first_app_id in apps:
-                    app_name = apps[first_app_id].get('common', {}).get('name')
-                    if app_name:
-                        return app_name
-
-        return None
+        return self.names_cache.get(f'{item_type}_{item_id}')
 
     def _print_field_change(self, field_name: str, field_change: Dict, indent: int = 0):
         """Print a single field change."""
@@ -438,7 +474,8 @@ class OutputMonitor:
         elif status == 'changed':
             old = field_change.get('old')
             new = field_change.get('new')
-            print(f"{prefix}{Colors.YELLOW}~ {field_name}: {old} → {new}{Colors.RESET}")
+            print(
+                f"{prefix}{Colors.YELLOW}~ {field_name}: {old} → {new}{Colors.RESET}")
 
     def _send_to_discord(self, changes: Dict):
         """
@@ -465,7 +502,8 @@ class OutputMonitor:
                         mentions.append(f'<@&{m}>')
                     else:
                         # Text reference like @role_name - keep as-is for Discord to interpret
-                        mentions.append(f'@{m}' if not m.startswith('@') else m)
+                        mentions.append(
+                            f'@{m}' if not m.startswith('@') else m)
 
             content = ' '.join(mentions) if mentions else ''
 
@@ -473,9 +511,11 @@ class OutputMonitor:
             if content:
                 payload['content'] = content
 
-            response = requests.post(self.webhook_url, json=payload, timeout=10)
+            response = requests.post(
+                self.webhook_url, json=payload, timeout=10)
             if response.status_code not in (200, 204):
-                print(f"⚠️  Discord webhook failed: {response.status_code}", file=sys.stderr)
+                print(
+                    f"⚠️  Discord webhook failed: {response.status_code}", file=sys.stderr)
         except Exception as e:
             print(f"⚠️  Failed to send Discord webhook: {e}", file=sys.stderr)
 
@@ -499,7 +539,8 @@ class OutputMonitor:
         # Packages section
         packages = changes.get('packages')
         if packages:
-            embed = self._build_section_embed('📦 Packages', packages, 'package')
+            embed = self._build_section_embed(
+                '📦 Packages', packages, 'package')
             embeds.append(embed)
 
         return embeds
@@ -528,14 +569,13 @@ class OutputMonitor:
             status = change_info.get('status')
             color = color_map.get(status, 0x808080)
 
+            name = self._get_item_name(item_id, change_info, item_type) or f"Unknown {item_type}"
             if status == 'new':
-                name = self._get_item_name(change_info, item_type) or 'Unknown'
-                value = f"+ {item_type} - {name}"
+                value = f"+ {name}"
             elif status == 'removed':
-                value = f"- {item_type}"
+                value = f"- {name}"
             elif status == 'changed':
-                name = self._get_item_name(change_info, item_type) or 'Unknown'
-                value = f"~ {item_type} - {name}\n"
+                value = f"~ {name}\n"
                 diff = change_info.get('diff', {})
                 for field_type, field_data in diff.items():
                     value += f"\n**{field_type.capitalize()}:**\n"
@@ -566,12 +606,58 @@ class OutputMonitor:
 
         return embed
 
-    def run(self, compare_file: Optional[Path] = None) -> int:
+    def _build_names(self, current: Dict, previous: Optional[Dict], changes: Dict):
+        """Build a cache of item names for better display in print and Discord."""
+        # Build names cache for current output
+        if current:
+            for app_id, app_data in current.get('apps', {}).items():
+                name = app_data.get('common', {}).get('name')
+                if name:
+                    self.names_cache[f'app_{app_id}'] = name
+
+        # Also add from previous output for removed items
+        if previous:
+            for app_id, app_data in previous.get('apps', {}).items():
+                key = f'app_{app_id}'
+                if key not in self.names_cache:
+                    name = app_data.get('common', {}).get('name')
+                    if name:
+                        self.names_cache[key] = name
+
+        if current:
+            for pkg_id, pkg_data in current.get('packages', {}).items():
+                key = f'package_{pkg_id}'
+                name = pkg_data.get('common', {}).get('name')
+                if name is None:
+                    for appid in pkg_data.get('appids', []):
+                        app_name = self.names_cache.get(f'app_{appid}')
+                        if app_name:
+                            name = f"{app_name} ({pkg_id})"
+                            break
+                if name is not None:
+                    self.names_cache[key] = name
+
+        if previous:
+            for pkg_id, pkg_data in previous.get('packages', {}).items():
+                key = f'package_{pkg_id}'
+                if key not in self.names_cache:
+                    name = pkg_data.get('common', {}).get('name')
+                    if name is None:
+                        for appid in pkg_data.get('appids', []):
+                            app_name = self.names_cache.get(f'app_{appid}')
+                            if app_name:
+                                name = f"{app_name} ({pkg_id})"
+                                break
+                    if name is not None:
+                        self.names_cache[key] = name
+
+    def run(self, compare_file: Optional[Path] = None, debug: bool = False) -> int:
         """
         Execute the monitoring logic.
 
         Args:
             compare_file: Optional file to compare against instead of fetching
+            debug: Debug mode - treat all items as new
 
         Returns:
             Exit code: 0 if output unchanged, 1 if changed, 2 if error
@@ -586,12 +672,12 @@ class OutputMonitor:
             print("❌ Failed to get current output", file=sys.stderr)
             return 2
 
-        # Load previous output
-        previous_output = self.load_previous_output()
-
-        # Store for use in _get_item_name
-        self.current_output = current_output
-        self.previous_output = previous_output
+        # Load previous output (unless debug mode)
+        previsous_output = None
+        if debug:
+            previous_output = {}
+        else:
+            previous_output = self.load_previous_output()
 
         # Compare
         changes = self.compare_outputs(current_output, previous_output)
@@ -604,6 +690,7 @@ class OutputMonitor:
 
         # Print and send changes if any
         if changes is not None:
+            self._build_names(current_output, previous_output, changes)
             self._print_changes(changes)
             if self.webhook_url:
                 self._send_to_discord(changes)
@@ -656,6 +743,12 @@ Examples:
         help='Discord mentions (user IDs or role references like @role_name)'
     )
 
+    parser.add_argument(
+        '--debug',
+        action='store_true',
+        help='Debug mode: treat all items as new (ignore previous state)'
+    )
+
     args = parser.parse_args()
 
     monitor = OutputMonitor(
@@ -663,7 +756,7 @@ Examples:
         webhook_url=args.webhook,
         mentions=args.mentions
     )
-    exit_code = monitor.run(compare_file=args.compare)
+    exit_code = monitor.run(compare_file=args.compare, debug=args.debug)
 
     sys.exit(exit_code)
 
